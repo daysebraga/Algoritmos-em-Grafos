@@ -35,12 +35,16 @@ Grafo* cria_grafo(int n){
     return GRAFO;
 }
 void inicializa_grafo(Grafo *G, int n){
+    Grafo *GRAFO = malloc(sizeof (GRAFO));
     G->n_vertices = n;
+    
     if(G != NULL){
 
         for(int i=0; i < G->n_vertices; i++){
-            for(int j=i; j <= G->n_vertices; j++)
-                insere_aresta(G,i,j);
+            for(int j=i; j <= G->n_vertices; j++){
+                GRAFO->lista_adjacencias[i] =  i;
+                insere_aresta(GRAFO,i,j);
+            }    
         }
     }
 }
@@ -67,8 +71,6 @@ void insere_vertice(Grafo *G, Vertice *vinse){
             if(atual == NULL){
                 atual = vinse;
             }
-            else if(atual->proximo == NULL)
-                atual->proximo = vinse;
         }
     }
 }
