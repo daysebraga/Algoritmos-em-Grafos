@@ -34,14 +34,13 @@ Grafo* cria_grafo(int n){
     }    
     return GRAFO;
 }
-void inicializa_grafo(Grafo *G, int n){
+void inicializa_grafo(Grafo *G){
     Grafo *GRAFO = malloc(sizeof (GRAFO));
-    G->n_vertices = n;
     
     if(G != NULL){
 
         for(int i=0; i < G->n_vertices; i++){
-            for(int j=i; j <= G->n_vertices; j++){
+            for(int j=0; j <= G->n_arestas; j++){
                 GRAFO->lista_adjacencias[i] =  i;
                 insere_aresta(GRAFO,i,j);
             }    
@@ -85,11 +84,7 @@ void insere_aresta(Grafo *G, int v1, int v2){
 //}
 
 int main(){
-    int n;
     Grafo *G;
-
-    printf("informe a quantidade de vertices do grafo: ");
-    scanf("%d", &n);
 
 cria_grafo(n);
 
