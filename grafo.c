@@ -17,8 +17,8 @@ struct grafo{
    lista **lista_adjacencias;
    int n_vertices;
    int n_arestas;
-   Vertice v;
-   int Aresta;
+   Vertice *v;
+   Vertice *Aresta;
 };
 
 Grafo* cria_grafo(){
@@ -36,18 +36,19 @@ Grafo* cria_grafo(){
     return GRAFO;
 }
 void inicializa_grafo(Grafo *G){
-    Grafo *GRAFO = malloc(sizeof (GRAFO));
 
     if(G != NULL){
 
         for(int i=0; i < G->n_vertices; i++){
-            for(int j=0; j <= G->n_arestas; j++){
-                GRAFO->lista_adjacencias[i] =  i;
-                insere_aresta(GRAFO,i,j);
-            }
+                G->lista_adjacencias[i]->head = i+1;
         }
+          insere_aresta(G,1,2);
+          insere_aresta(G,2,3);
+          insere_aresta(G,3,4);
+          insere_aresta(G,4,5);
     }
 }
+
 void imprime_grafo(Grafo *G, FILE * saida){
 Vertice *p;
 
@@ -72,42 +73,68 @@ void insere_vertice(Grafo *G, Vertice *vinse){
     Vertice *atual = malloc(sizeof (Vertice));
 
     if(G != NULL){
-        for(int i=0; i < G->n_vertices; i++)
+        for(int i=0; i < G->n_vertices; i++){
             atual = G->lista_adjacencias[i]->head;
-             if(atual == NULL){
-                atual = vinse;
+                 if(atual == NULL){
+                    atual = vinse;
 
-            G->n_vertices++;
+                G->n_vertices++;
+            }
         }
     }
 }
-int buscar(Grafo * G, Vertice *v){
- 
-    for(int i=0; i < G->n_vertices; i++){
-        for(int j=0; j < G->n_vertices; j++){
-            
-            if(G->lista_adjacencias[i] == v)
-                return v;
+int buscar(Grafo * G, Vertice *V){
+
+        while(V < G->v && V->proximo != NULL){
+            if(G->lista_adjacencias == V)
+            return V;
+        }
+}
+void insere_aresta(Grafo *G, Vertice *v1, Vertice *v2){
+
+    Vertice *aux2 = malloc(sizeof (Vertice));
+    Vertice *aux = G->lista_adjacencias[v1]->head;
+
+    while(v1 < G->v && v1->proximo != NULL){
+        if(v1 > 0 && v2 >0){
+            G->Aresta[v1]->proximo = G->lista_adjacencias[v2]->head;
+            aux = v1->proximo;
+            aux2 = aux->proximo;
         }
     }
-}
-void insere_aresta(Grafo *G, int v1, int v2){
-
-    for(int i=0; i < G->n_vertices; i++)
-        if(v1 > 0 && v2 >0)
-            G->lista_adjacencias = G->lista_adjacencias[v1][v2] = 1;
-
     G->n_arestas++;
 }
 
-voi remove_vertice(Vertice *v, Grafo *G){
+void remove_vertice(Vertice *v, Grafo *G){
+    int adj[10];
+    Vertice *aux = G->lista_adjacencias[v]->head;
+    int soma=0;
+    Vertice *atual = malloc(sizeof (Vertice));
+
+    if(v != NULL){
+        for(int i=0; i < G->n_vertices; i++){
+            if( i == v ){
+
+                for(int j=0; j< G->n_vertices; j++){
+                    adj[j] = aux;
+                    aux = aux->proximo;
+                }
+            }
+        }
+        aux = G->lista_adjacencias[v]->head;
+        atual = aux;
+        while(aux != NULL && adj[soma] == v){
+            aux = atual;
+            atual = atual->proximo;
+            soma++;
+        }
+        free(aux);
+    }
+}
+
+void remove_aresta(){
 
 }
-void remove_aresta()
-
-//void atualiza_adjacencia(Grafo G, Vertice V){
-
-//}
 
 int main(){
     Grafo *G;
@@ -121,4 +148,5 @@ cria_grafo();
     }
 imprime_grafo(G, arquivo);
 fclose(arquivo);
+
 }
