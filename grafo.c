@@ -1,152 +1,366 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct vertice Vertice;
-struct vertice{
+typedef struct Vertice Vertice;
+typedef struct lista lista;
+typedef struct Grafo Grafo;
+
+struct Vertice{
     int rotulo;
-    Vertice  *proximo;
+    Vertice *proximo;
 };
 
-typedef struct Lista lista;
-struct Lista{
+struct lista{
     Vertice *head;
 };
 
-typedef struct grafo Grafo;
-struct grafo{
-   lista **lista_adjacencias;
-   int n_vertices;
-   int n_arestas;
-   Vertice *v;
-   Vertice *Aresta;
+struct Grafo{
+    int n_vertices;
+    int n_arestas;
+    lista **lista_adjacencias;
 };
 
-Grafo* cria_grafo(){
-    int n = 5;
-    Grafo *GRAFO = malloc(sizeof (GRAFO));
+Grafo *cria_grafo(int v){
+    Grafo *G = (Grafo*)malloc(sizeof(Grafo));
 
-    GRAFO->n_vertices = n;
-    GRAFO->n_arestas = 4;
-    GRAFO->lista_adjacencias = malloc(n * sizeof(lista*));
+    G->n_vertices = 0;
+    G->n_arestas = 0;
+    G->lista_adjacencias = (lista**)malloc(sizeof(lista*) * v);
 
-    for(int i=0; i < n; i++){
-        GRAFO->lista_adjacencias[i] = malloc(sizeof (lista));
-        GRAFO->lista_adjacencias[i]->head = NULL;
+    for(int i = 0; i < G->n_vertices; i ++){
+        G->lista_adjacencias[i] = (lista*)malloc(sizeof(lista));
+        G->lista_adjacencias[i]->head = NULL;
     }
-    return GRAFO;
+    return G;
 }
-void inicializa_grafo(Grafo *G){
 
+void insere_vertice(Grafo *G, int rotulo){
+    if(G != NULL && rotulo >= 0){
+        Vertice *novo_vertice = (Vertice*)malloc(sizeof(Vertice));
+        novo_vertice->rotulo = rotulo;
+        novo_vertice->proximo = NULL;
+
+        G->lista_adjacencias[G->n_vertices] = (lista*)malloc(sizeof(lista));
+        G->lista_adjacencias[G->n_vertices]->head = novo_vertice;
+
+        G->n_vertices++;
+    }
+}
+
+int buscar_indice_Rotulo(Grafo *G, int v){
+    for(int i = 0; i < G->n_vertices; i++){
+        Vertice *aux = G->lista_adjacencias[i]->head;
+
+        if(aux->rotulo == v)
+            return i;
+    }
+
+    return -1;
+}
+
+void insere_aresta(Grafo *G, int v1, int v2){
     if(G != NULL){
+        int id_v1 = buscar_indice_Rotulo(G, v1);
+        int id_v2 = buscar_indice_Rotulo(G, v2);
 
-        for(int i=0; i < G->n_vertices; i++){
-                G->lista_adjacencias[i]->head = i+1;
-        }
-          insere_aresta(G,1,2);
-          insere_aresta(G,2,3);
-          insere_aresta(G,3,4);
-          insere_aresta(G,4,5);
-    }
-}
+        if((id_v1 != -1) && (id_v2 != -1)){
+            Vertice *aux_v2 = malloc(sizeof(Vertice));
+            aux_v2->rotulo = v2;
+            aux_v2->proximo = NULL;
 
-void imprime_grafo(Grafo *G, FILE * saida){
-Vertice *p;
+            if(G->lista_adjacencias[id_v1]->head == NULL)
+                G->lista_adjacencias[id_v1]->head = aux_v2;
+            else{
+                Vertice *aux = G->lista_adjacencias[id_v1]->head;
+                while(aux->proximo != NULL)
+                    aux = aux->proximo;
 
-    fprintf(saida, "%d %d\n", G->n_vertices, G->n_arestas);
-    for (int i = 0; i < G->n_vertices; i++) {
-        for (p = G->lista_adjacencias[i]; p != NULL; p = p->proximo) {
-            fprintf(saida, "%2d", p->rotulo);
-        }
-        fprintf(saida, "-1\n");
-    }
-}
-void imprime_matriz(Grafo *G){
-
-    for(int i=0; i < G->n_vertices; i++){
-        for(int j=0; j< G->n_arestas; j++){
-            printf("%d -> %d", G->lista_adjacencias[i][j]);
-        }
-    }
-}
-void insere_vertice(Grafo *G, Vertice *vinse){
-
-    Vertice *atual = malloc(sizeof (Vertice));
-
-    if(G != NULL){
-        for(int i=0; i < G->n_vertices; i++){
-            atual = G->lista_adjacencias[i]->head;
-                 if(atual == NULL){
-                    atual = vinse;
-
-                G->n_vertices++;
+                aux->proximo = aux_v2;
             }
+
+            Vertice *aux_v1 = malloc(sizeof(Vertice));
+            aux_v1->rotulo = v1;
+            aux_v1->proximo = NULL;
+
+            if(G->lista_adjacencias[id_v2]->head == NULL)
+                G->lista_adjacencias[id_v2]->head = aux_v1;
+            else{
+                Vertice *aux = G->lista_adjacencias[id_v2]->head;
+                while(aux->proximo != NULL)
+                    aux = aux->proximo;
+
+                aux->proximo = aux_v1;
+            }
+
+            G->n_arestas++;
         }
     }
 }
-int buscar(Grafo * G, Vertice *V){
+void remove_vertice(Grafo *G, int v){
+    if(G != NULL){
+        int id_v = buscar_indice_Rotulo(G, v);
 
-        while(V < G->v && V->proximo != NULL){
-            if(G->lista_adjacencias == V)
-            return V;
-        }
-}
-void insere_aresta(Grafo *G, Vertice *v1, Vertice *v2){
+        if(id_v != -1){
+            for(int i = 0; i < G->n_vertices; i++){ //remover as arestas dos outros vertices que apontam para o v
+                if(i != id_v){
+                    Vertice *aux = G->lista_adjacencias[i]->head;
+                    Vertice *anterior = NULL;
+                    while(aux != NULL){
+                        if(aux->rotulo == v){
+                            if(anterior == NULL)
+                                G->lista_adjacencias[i]->head = aux->proximo; //remover o primeiro ponto
+                            else
+                                anterior->proximo = aux->proximo;  //remover algum do meio ou do fim
 
-    Vertice *aux2 = malloc(sizeof (Vertice));
-    Vertice *aux = G->lista_adjacencias[v1]->head;
+                            free(aux);
+                            break;
+                        }
+                        anterior = aux;
+                        aux = aux->proximo;
+                    }
+                }
+            }
 
-    while(v1 < G->v && v1->proximo != NULL){
-        if(v1 > 0 && v2 >0){
-            G->Aresta[v1]->proximo = G->lista_adjacencias[v2]->head;
-            aux = v1->proximo;
-            aux2 = aux->proximo;
+            Vertice *aux = G->lista_adjacencias[id_v]->head; 
+            while(aux != NULL){
+                Vertice *temp = aux;
+                aux = aux->proximo;
+                free(temp);  
+            }
+
+            free(G->lista_adjacencias[id_v]); 
+
+            for(int i = id_v; i < G->n_vertices - 1; i++) 
+                G->lista_adjacencias[i] = G->lista_adjacencias[i + 1];
+
+            G->n_vertices--;
         }
     }
-    G->n_arestas++;
 }
 
-void remove_vertice(Vertice *v, Grafo *G){
-    int adj[10];
-    Vertice *aux = G->lista_adjacencias[v]->head;
-    int soma=0;
-    Vertice *atual = malloc(sizeof (Vertice));
+void remove_aresta(Grafo *G, int v1, int v2){
+    if(G != NULL){
+        int id_v1 = buscar_indice_Rotulo(G, v1);
+        int id_v2 = buscar_indice_Rotulo(G, v2);
 
-    if(v != NULL){
-        for(int i=0; i < G->n_vertices; i++){
-            if( i == v ){
+        if(id_v1 != -1 && id_v2 != -1){
+            Vertice *aux = G->lista_adjacencias[id_v1]->head;
+            Vertice *anterior = NULL;
 
-                for(int j=0; j< G->n_vertices; j++){
-                    adj[j] = aux;
+            while(aux != NULL){
+                if(aux->rotulo == v2){
+                    if(anterior == NULL)
+                        G->lista_adjacencias[id_v1]->head = aux->proximo;
+                    else
+                        anterior->proximo = aux->proximo;
+
+                    free(aux);
+                    break;
+                }
+                anterior = aux;
+                aux = aux->proximo;
+            }
+
+            aux = G->lista_adjacencias[id_v2]->head;
+            anterior = NULL;
+
+            while(aux != NULL){
+                if (aux->rotulo == v1) {
+                    if (anterior == NULL)
+                        G->lista_adjacencias[id_v2]->head = aux->proximo;
+                    else
+                        anterior->proximo = aux->proximo;
+
+                    free(aux);
+                    break;
+                }
+                anterior = aux;
+                aux = aux->proximo;
+            }
+
+            G->n_arestas--;
+        }
+    }
+}
+
+void imprime_grafo(Grafo *G){
+    if(G != NULL){
+        for(int i = 0; i < G->n_vertices; i++){
+            printf("Vertice %d: ", i + 1);
+
+            Vertice *aux = G->lista_adjacencias[i]->head;
+
+            if(aux != NULL){
+                while(aux != NULL){
+                    printf("%d -> ", aux->rotulo);
                     aux = aux->proximo;
                 }
             }
+            printf("\n");
         }
-        aux = G->lista_adjacencias[v]->head;
-        atual = aux;
-        while(aux != NULL && adj[soma] == v){
-            aux = atual;
-            atual = atual->proximo;
-            soma++;
-        }
-        free(aux);
     }
 }
 
-void remove_aresta(){
+void liberar_grafo(Grafo *G){
+    if(G != NULL){
+        for(int i = 0; i < G->n_vertices; i++){
+            Vertice *aux = G->lista_adjacencias[i]->head;
+            Vertice *temp;
 
+            while(aux != NULL){
+                temp = aux;
+                aux = aux->proximo;
+                free(temp);
+            }
+
+            free(G->lista_adjacencias[i]);
+        }
+
+        free(G->lista_adjacencias);
+
+        free(G);
+    }
 }
 
-int main(){
-    Grafo *G;
+void menu() {
+    printf("\n--- Menu ---\n");
+    printf("1: Inicializar Vertices.\n");
+    printf("2: Inserir Arestas.\n");
+    printf("3: Visualizar Grafo.\n");
+    printf("4: Remover Vertices.\n");
+    printf("5: Remover Arestas.\n");
+    printf("6: Salvar em Arquivo.\n");
+    printf("7: Sair.\n");
+    printf("Escolha uma opcao: ");
+}
 
-cria_grafo();
+void iniciar_trabalho(Grafo *G){
+    insere_vertice(G, 1);
+    insere_vertice(G, 2);
+    insere_vertice(G, 3);
+    insere_vertice(G, 4);
+    insere_vertice(G, 5);
+    insere_vertice(G, 6);
+    insere_vertice(G, 7);
+    insere_vertice(G, 8);
+    insere_vertice(G, 9);
 
-    FILE *arquivo = fopen("saida.txt", "w");
+    insere_aresta(G, 1, 2);
+    insere_aresta(G, 1, 6);
+    insere_aresta(G, 4, 2);
+    insere_aresta(G, 3, 2);
+    insere_aresta(G, 3, 5);
+    insere_aresta(G, 4, 6);
+    insere_aresta(G, 4, 5);
+    insere_aresta(G, 4, 7);
+    insere_aresta(G, 7, 8);
+    insere_aresta(G, 7, 9);
+}
 
-    if (arquivo == NULL) {
-        perror("Erro ao abrir o arquivo");
+void ler_arquivo(Grafo *G, const char *nome_arquivo){
+    FILE *arquivo = fopen(nome_arquivo, "r");
+    if(arquivo == NULL){
+        printf("Erro ao abrir o arquivo.\n");
+        return;
     }
-imprime_grafo(G, arquivo);
-fclose(arquivo);
 
+    int num_vertices;
+    fscanf(arquivo, "%d", &num_vertices);
+    for(int i = 1; i <= num_vertices; i++)
+        insere_vertice(G, i);
+
+    int v1, v2;
+    while(fscanf(arquivo, "%d %d", &v1, &v2) != EOF)
+        insere_aresta(G, v1, v2);
+
+    fclose(arquivo);
+}
+
+void salvar_arquivo(Grafo *G, const char *nome_arquivo){
+    FILE *arquivo = fopen(nome_arquivo, "w");
+    if(arquivo == NULL){
+        printf("Erro ao abrir o arquivo para escrita.\n");
+        return;
+    }
+
+    fprintf(arquivo, "%d\n", G->n_vertices);
+
+    for(int i = 0; i < G->n_vertices; i++){
+        Vertice *aux = G->lista_adjacencias[i]->head;
+
+        while(aux != NULL){
+            if(i + 1 < aux->rotulo)
+                fprintf(arquivo, "%d %d\n", i + 1, aux->rotulo);
+
+            aux = aux->proximo;
+        }
+    }
+
+    fclose(arquivo);
+}
+
+int main(void){
+    int opcao, V, v1, v2, aresta;
+    int verificador = 0;
+
+    printf("O Grafo foi inicializado com 9 vertices.");
+    V = 9;
+
+    Grafo *G = cria_grafo(V);
+    iniciar_trabalho(G);
+    //ler_arquivo(G, "C:/Users/User/Desktop/arquivoGrafo.txt");
+
+    do{
+        menu();
+        scanf("%d", &opcao);
+
+        switch(opcao){
+            case 1:
+                if(verificador == 0){ 
+                    for(int i = 0; i < V; i++){
+                        printf("Informe o vertice a ser inicializado (1 a %d): ", V);
+                        scanf("%d", &v1);
+                        insere_vertice(G, v1);
+                        verificador = 1;
+                    }
+                }else
+                    printf("Ja foram inicializados os vertices.");
+                break;
+            case 2:
+                printf("Informe a quantidade de arestas a serem inseridas: ");
+                scanf("%d", &aresta);
+
+                for(int i = 0; i < aresta; i++){
+                        printf("Informe os vertices v1 e v2 para criar uma aresta: ");
+                        scanf("%d %d", &v1, &v2);
+                        insere_aresta(G, v1, v2);
+                }
+                break;
+            case 3:
+                imprime_grafo(G);
+                break;
+            case 4:
+                printf("Informe o vertice a ser removido: ");
+                scanf("%d", &v1);
+                remove_vertice(G, v1);
+                break;
+            case 5:
+                printf("Informe os vertices v1 e v2 para remover a aresta: ");
+                scanf("%d %d", &v1, &v2);
+                remove_aresta(G, v1, v2);
+                break;
+            case 6:
+                salvar_arquivo(G, "salvarGrafo.txt");
+                printf("Grafo salvo com sucesso no arquivo 'salvarGrafo.txt'.\n");
+                break;
+            case 7:
+                printf("Saindo...\n");
+                break;
+            default:
+                printf("Opcao invalida. Tente novamente.\n");
+        }
+    }while(opcao != 7);
+
+    liberar_grafo(G);
+    return 0;
 }
