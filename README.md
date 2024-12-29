@@ -10,13 +10,14 @@
 </html>
 
   ```ruby
-    A diciplina de Algoritmos em Grafos que é minitrada pelo professor Silvio Boss, que tem como planejamento
-    a execução de 4 trabalhos, que visa, abordar os assuntos tanto da diciplina de Algoritmos 2
-    quanto Algoritmos em Grafos, como:
+    A diciplina de Algoritmos em Grafos que é minitrada pelo professor Silvio Boss,
+    que tem como planejamento a execução de 4 trabalhos, que visa,
+    abordar os assuntos tanto da diciplina de Algoritmos 2 quanto Algoritmos em Grafos,
+    como:
       * Listas Encadeadas;
       * Grafos Direcionados e Não Direcionados;
       * Arvores e Florestas;
-      * Algoritmos de Busca, Largura e Profundidade;
+      * Algoritmos de Busca, Largura e Profundidade.
 
     cada trabalho aborda uma temática que nessecida do domínio destas habilidades!
 ```
