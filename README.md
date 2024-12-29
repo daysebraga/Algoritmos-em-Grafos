@@ -1,5 +1,4 @@
 # _Algoritmos em Grafos_
-----
 <html>
   <img align="left" height="80" width="80"
     src="https://orig00.deviantart.net/b251/f/2016/057/d/6/_runningpixels_by_virev-d9t6vr8.gif"
@@ -22,4 +21,4 @@
     cada trabalho aborda uma temática que nessecida do domínio destas habilidades!
 ```
 
-$\color{green}{\text{Os arquivos com os códigos se encontra dentro da pasta "Algoritmos em Grafos", Obrigada"!}}$
+$\color{green}{\text{Os arquivos com os códigos se encontra dentro da pasta "Algoritmos em Grafos", Obrigada!}}$
